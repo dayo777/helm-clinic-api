@@ -15,12 +15,16 @@ spec:
       labels:
         {{- include "clinic-booking-api.selectorLabels" . | nindent 7}}
     spec:
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
       volumes:
       - name: settings-volume
         secret:
           secretName: settings-toml-secret
       containers:
       - name: clinic-booking
+        securityContext:
+          {{- toYaml .Values.securityContext | nindent 10 }}
         workingDir: /usr/local/bin
         image: "{{ .Values.image.repo}}/{{ .Values.image.name }}:{{ .Values.image.tag | default .Chart.AppVersion}}"
         imagePullPolicy: {{ .Values.image.imagePullPolicy}}
@@ -55,4 +59,6 @@ spec:
           mountPath: /usr/local/bin/settings_dev.toml # settings file is injected here
           readOnly: true
           subPath: settings_dev.toml
+        resources:
+          {{- toYaml .Values.resources | nindent 10 }}
         

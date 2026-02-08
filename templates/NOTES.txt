@@ -1,21 +1,15 @@
-# -------------Important----------------
-# Ensure to have Jaegar endpoint setup.
-# Ensure you have your MongoDB Atlas setup,
-# ↵ also ensure your Network Address can connect to MongoDB Atlas
+-------------Important----------------
+Setup Jaegar Endpoint UI
+Setup MongoDB URI
+Minikube
 
-# skip to step 2 if you cloned from GitHub
+Refer to the README.md to get up and running
 
-# step 1: create the helm chart (Only if starting from scratch)
-`helm create helm-clinic-booking`
+I used Minikube tunnel to act as a Network bridge, open a new terminal and enter:
+`minikube tunnel`
 
-# review the values & install the Helm chart
-`helm install clinic-booking-api .`
+# Get the service IP addr
+`kubectl get svc -n dev`
 
 # Upgrade after templating
-`helm upgrade clinic-booking-api . --values values.yaml`
-
-# If running locally, you can do this.
-```
-servicename=$(k get service -l "app={{ .Values.appName }}" -o jsonpath="{.items[0].metadata.name}")
-kubectl port-forward service/clinic-booking-api-service 8080:8080 --namespace {{ .Values.namespace }}
-```
+`helm upgrade clinic-booking-api . -f values.yaml -n dev`

@@ -57,6 +57,17 @@ resources:
     cpu: 500m
     memory: 512Mi
 
+securityContext:
+  capabilities:
+    drop:
+      - ALL
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
+  runAsUser: 1000
+
+podSecurityContext:
+  fsGroup: 2000
+
 gateway:
   name: clinic-api-gw
   hostname: "localhost"
