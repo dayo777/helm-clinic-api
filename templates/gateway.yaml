@@ -1,0 +1,31 @@
+{{- $svcPort := .Values.service.port -}}
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: GatewayClass
+metadata:
+  name: nginx-gateway-class
+  namespace: nginx-gateway
+spec:
+  controllerName: gateway.nginx.org/nginx-gateway-controller
+  description: ""
+  parametersRef:
+    group: gateway.nginx.org
+    kind: NginxProxy
+    name: ngf-proxy-config
+    namespace: nginx-gateway
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: {{ .Values.gateway.name }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  gatewayClassName: nginx-gateway-class
+  listeners:
+  - name: http
+    protocol: HTTP
+    port: {{ $svcPort }}
+    hostname: {{ .Values.gateway.hostname | quote }}
+    allowedRoutes:
+      namespaces:
+        from: Same

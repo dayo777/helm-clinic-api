@@ -1,0 +1,13 @@
+# apiVersion: v1
+# kind: ConfigMap
+# metadata:
+#   name: jaegar-config
+#   namespace: {{ .Release.Namespace }}
+# data:
+#   settings.toml: |
+#     [mongodb]
+#     uri = "${MONGODB_URI}"
+#     database = "clinic_booking_api"
+    
+#     [tracing]
+#     OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317

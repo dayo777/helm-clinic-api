@@ -1,0 +1,72 @@
+# values declarations for the default namespace
+# You only have to input the MongoDB URI & Database to populate the
+# ...secret values, which populates the Settings_dev.toml and is added
+# ...to the WorkDir by the Deployment manifest
+appName: clinic-booking-api
+component: server
+partOf: clinic-backend
+
+replicaCount: 1
+#namespace: default
+
+image:
+  repo: dayo777
+  name: clinic-booking-api
+  tag: main
+  imagePullPolicy: Always # since the latest container is always tagged `main`
+  ports:
+    name: clinic-ports
+
+service:
+  type: LoadBalancer
+  port: 8080
+
+serviceAccount:
+  create: true
+  automount: true
+  annotations: {}
+  name: ""
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: localhost
+      paths:
+        - path: /api
+          pathType: ImplementationSpecific
+  tls: []
+
+httpRoute:
+  enabled: true
+  headers:
+    - name: x-api-version
+      value: "1"
+    - name: Content-Type
+      value: application/json
+
+autoscaling:
+  enabled: false
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 500m
+    memory: 512Mi
+
+gateway:
+  name: clinic-api-gw
+  hostname: "localhost"
+
+# enter the MongoDB URI & database name below
+# also ensure your IP address is trusted by MongoDB to allow access
+mongodb:
+  uri: ""
+  database: ""
+
+# you may change the Jaegar endpoint if logging remotely
+tracing:
+  otelEndpoint: "localhost:4317"

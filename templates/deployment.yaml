@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "{{ .Chart.Name }}-deployment"
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "clinic-booking-api.selectorLabels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount | default 1 }}
+  selector:
+    matchLabels:
+      {{- include "clinic-booking-api.selectorLabels" . | nindent 6}}
+  template:
+    metadata:
+      labels:
+        {{- include "clinic-booking-api.selectorLabels" . | nindent 7}}
+    spec:
+      volumes:
+      - name: settings-volume
+        secret:
+          secretName: settings-toml-secret
+      containers:
+      - name: clinic-booking
+        workingDir: /usr/local/bin
+        image: "{{ .Values.image.repo}}/{{ .Values.image.name }}:{{ .Values.image.tag | default .Chart.AppVersion}}"
+        imagePullPolicy: {{ .Values.image.imagePullPolicy}}
+        ports:
+        - containerPort: {{ .Values.service.port }}
+          name: {{ .Values.image.ports.name | trunc 15 }}
+          protocol: TCP
+        livenessProbe:
+          httpGet:
+            path: /api # TODO: this should output "Welcome to v1!"; But change this to proper /health endpoint
+            port: {{ .Values.service.port }}
+            httpHeaders:
+              {{- range .Values.httpRoute.headers }}
+            - name: {{ .name | quote }}
+              value: {{ .value | quote }}
+              {{- end }}
+          initialDelaySeconds: 20
+          periodSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /api # TODO: change this to a health api
+            port: {{ .Values.service.port }}
+            httpHeaders:
+              {{- range .Values.httpRoute.headers }}
+            - name: {{ .name | quote }}
+              value: {{ .value | quote }}
+              {{- end }}
+          initialDelaySeconds: 15
+          periodSeconds: 10
+        volumeMounts:
+        - name: settings-volume
+          mountPath: /usr/local/bin/settings_dev.toml # settings file is injected here
+          readOnly: true
+          subPath: settings_dev.toml
+        

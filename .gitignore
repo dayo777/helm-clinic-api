@@ -1,0 +1,6 @@
+# local values files (do not commit)
+values-dev.yaml
+values-prod.yaml
+
+# IntelliJ IDEA files
+.idea/

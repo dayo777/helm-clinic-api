@@ -1,0 +1,22 @@
+apiVersion: v2
+name: clinic-booking-api
+description: This chart deploys the clinic-booking-api backend
+version: 0.1.0
+appVersion: "0.1.0"
+type: application
+
+icon: https://github.com/dayo777/images/blob/main/clinic-image.png
+
+keywords:
+  - clinic
+  - booking
+  - rust
+  - actix-web
+  - mongodb
+
+sources:
+  - https://github.com/dayo777/clinic_booking_api
+
+maintainers:
+  - name: Dru
+    email: oruns@outlook.com

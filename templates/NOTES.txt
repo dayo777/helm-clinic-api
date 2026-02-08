@@ -1,0 +1,21 @@
+# -------------Important----------------
+# Ensure to have Jaegar endpoint setup.
+# Ensure you have your MongoDB Atlas setup,
+# ↵ also ensure your Network Address can connect to MongoDB Atlas
+
+# skip to step 2 if you cloned from GitHub
+
+# step 1: create the helm chart (Only if starting from scratch)
+`helm create helm-clinic-booking`
+
+# review the values & install the Helm chart
+`helm install clinic-booking-api .`
+
+# Upgrade after templating
+`helm upgrade clinic-booking-api . --values values.yaml`
+
+# If running locally, you can do this.
+```
+servicename=$(k get service -l "app={{ .Values.appName }}" -o jsonpath="{.items[0].metadata.name}")
+kubectl port-forward service/clinic-booking-api-service 8080:8080 --namespace {{ .Values.namespace }}
+```
