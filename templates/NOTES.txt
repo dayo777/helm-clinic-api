@@ -1,6 +1,6 @@
 -------------Important----------------
-Setup Jaegar Endpoint UI
-Setup MongoDB URI
+Enter Jaegar Endpoint in `values.yaml`
+Enter MongoDB URI in `values.yaml`
 Minikube
 
 Refer to the README.md to get up and running

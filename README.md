@@ -2,10 +2,10 @@
 
 ## Overview
 
-This Helm chart deploys the `clinic-booking-api` backend, a Rust-based application built with Actix Web that provides API services for clinic booking operations. The application integrates with MongoDB for data persistence and is designed to run on Kubernetes clusters.
+This Helm chart deploys the `clinic-booking-api` backend, a Rust-based application built with Actix Web that provides API services for clinic booking operations. The application integrates with MongoDB for data persistence and is designed to easily be managed by Helm.
 
 
-For more details, visit the [GitHub repository](https://github.com/dayo777/clinic_booking_api).
+For more details, visit the [Source code repository](https://github.com/dayo777/clinic_booking_api).
 
 > the [settings_dev.toml](templates/secret.yaml) file is used to pass values needed for the App to access credentials.
 
@@ -17,7 +17,7 @@ For more details, visit the [GitHub repository](https://github.com/dayo777/clini
 - MongoDB Atlas (for database persistence)
 - Jaegar Endpoint (for collecting logs)
 
-## Installation
+## Getting Started
 
 ### Clone the Repository
 
@@ -29,14 +29,15 @@ cd helm-clinic-api
 ```
 
 ### Install the Chart
+> Enter the values for the MongoDB URI & Jaeger endpoints into the `values.yaml` file.
 
 1. To install the chart with the release name `clinic-release-dev` in the `dev` namespace:
 ```bash
 kubectl create namespace dev
-helm install clinic-release-dev . -f values_dev.yaml -n dev
+helm install clinic-release-dev . -f values.yaml -n dev
 ```
 
-2. Enable Minikube tunnel to act as a network bridge:
+2. Enable Minikube tunnel to act as a network bridge for the LoadBalancer:
 ```bash
 minikube tunnel
 ```
@@ -46,12 +47,15 @@ minikube tunnel
 k get svc -n dev
 ```
 
+> Do not forget to add the required headers `x-api-version: 1` & `Content-Type: application/json`
+
 4. As an example, if the IP is `10.109.3.4`, access it through the BaseEndpoint below. 
 ```bash
 10.109.3.4:8080/api
 ```
 
-> Do not forget to add the required headers `x-api-version: 1' & `Content-Type: application/json`
+5. You can view the available endpoints [here](https://github.com/dayo777/clinic_booking_api/blob/main/endpoints.md)
+
 
 ![Database Screenshot](ss1.png)
 
