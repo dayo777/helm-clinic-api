@@ -20,3 +20,12 @@ sources:
 maintainers:
   - name: Dru
     email: oruns@outlook.com
+
+# # added this in-case Jaeger needs to be added as a dependency.
+# # you can configure dependecy values through the Alias under `jaeger`
+# dependencies:
+#   - name: jaeger
+#     version: ""
+#     condition: jaeger.enabled
+#     repository: "https://jaegertracing.github.io/helm-charts"
+#     alias: jaeger

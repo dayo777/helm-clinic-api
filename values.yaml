@@ -78,6 +78,21 @@ mongodb:
   uri: ""
   database: ""
 
-# you may change the Jaegar endpoint if logging remotely
+# edit the Jaeger endpoint accordingly
+# note that the IP addr below is my Minikube addr, so pods can reach localhost
 tracing:
-  otelEndpoint: "localhost:4317"
+  otelEndpoint: "192.168.49.1:4317"
+
+# check connectivity to Jaeger/OTLP endpoint (host:port) before install.
+# hook job is deleted after success or failure (see hook-delete-policy).
+preInstallHooks:
+  jaeger:
+    enabled: true
+    # imagePullSecrets: []
+  mongodb:
+    enabled: true
+    # imagePullSecrets: []
+
+jaeger:
+  enabled: false
+  # jaeger specific config goes here

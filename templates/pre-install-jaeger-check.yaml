@@ -1,0 +1,44 @@
+{{- if .Values.preInstallHooks.jaeger.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "clinic-booking-api.fullname" . }}-pre-install-jaeger-check
+  labels:
+    {{- include "clinic-booking-api.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": pre-install
+    "helm.sh/hook-weight": "-5"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded,hook-failed
+spec:
+  ttlSecondsAfterFinished: 0
+  backoffLimit: 3
+  template:
+    metadata:
+      labels:
+        {{- include "clinic-booking-api.labels" . | nindent 8 }}
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: jaeger-connectivity-check
+          image: busybox:1.36
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              ENDPOINT="{{ .Values.tracing.otelEndpoint }}"
+              echo "Checking connectivity to Jaeger/OTLP endpoint $ENDPOINT..."
+              # remove protocol if present
+              CLEAN_ENDPOINT=$(echo $ENDPOINT | sed -e 's|^[^/]*//||')
+              host=$(echo $CLEAN_ENDPOINT | cut -d: -f1)
+              port=$(echo $CLEAN_ENDPOINT | cut -d: -f2)
+              if [ -z "$port" ]; then
+                port="4317"
+              fi
+              nc -z -v -w 5 "$host" "$port" || exit 1
+              echo "Jaeger endpoint is reachable."
+      {{- with .Values.preInstallHooks.jaeger.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}

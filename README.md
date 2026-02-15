@@ -9,13 +9,12 @@ For more details, visit the [Source code repository](https://github.com/dayo777/
 
 > the [settings_dev.toml](templates/secret.yaml) file is used to pass values needed for the App to access credentials.
 
-## Prerequisites
+## Prerequisites to run locally
 - Minikube
 - Kubernetes cluster (version 1.30+)
 - Helm (version 3.0+)
-- kubectl configured to access your cluster
 - MongoDB Atlas (for database persistence)
-- Jaegar Endpoint (for collecting logs)
+- Jaeger Endpoint (for collecting logs)
 
 ## Getting Started
 
