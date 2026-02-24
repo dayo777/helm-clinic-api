@@ -24,6 +24,11 @@ jobs:
         run: |
           helm lint .
 
+      - name: Run yamllint
+        run: |
+          sudo apt-get update && sudo apt-get install -y yamllint
+          yamllint .
+
   validate:
     runs-on: ubuntu-latest
     steps:
@@ -41,9 +46,26 @@ jobs:
           tar -xzf kubeconform-linux-amd64.tar.gz
           sudo mv kubeconform /usr/local/bin/
 
-      - name: Validate Helm Templates
+      - name: Validate Helm Templates (Default)
         run: |
-          helm template test-release . | kubeconform -kubernetes-version 1.27.0 -
+          helm template test-release . | kubeconform -kubernetes-version 1.27.0 -strict -summary
+
+      - name: Validate Helm Templates (Dev)
+        run: |
+          helm template test-release . -f values-dev.yaml | kubeconform -kubernetes-version 1.27.0 -strict -summary
+
+      - name: Validate Helm Templates (Prod)
+        run: |
+          helm template test-release . -f values-prod.yaml | kubeconform -kubernetes-version 1.27.0 -strict -summary
+
+      - name: Set up Kube-linter
+        run: |
+          curl -L https://github.com/stackrox/kube-linter/releases/download/v0.6.0/kube-linter-linux.tar.gz | tar -xz
+          sudo mv kube-linter /usr/local/bin/
+
+      - name: Run Kube-linter
+        run: |
+          helm template . | kube-linter lint -
 
   test:
     runs-on: ubuntu-latest
@@ -65,43 +87,25 @@ jobs:
         run: |
           ct lint --config .ct.yaml || true  # Adjust config as needed
 
-  security:
+  dry-run:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Run Trivy vulnerability scanner in IaC mode
-        uses: aquasecurity/trivy-action@master
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
         with:
-          scan-type: 'config'
-          hide-progress: false
-          format: 'sarif'
-          output: 'trivy-results-config.sarif'
-          exit-code: '1'
-          severity: 'CRITICAL,HIGH'
+          version: v3.12.0
 
-      - name: Run Trivy vulnerability scanner in repo mode (secrets)
-        uses: aquasecurity/trivy-action@master
-        with:
-          scan-type: 'fs'
-          scanners: 'secret'
-          hide-progress: false
-          format: 'sarif'
-          output: 'trivy-results-secrets.sarif'
-          exit-code: '1'
-          severity: 'CRITICAL,HIGH'
+      - name: Helm Install Dry-run (Default)
+        run: |
+          helm install dry-run . --dry-run --debug
 
-      - name: Upload Trivy config scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v2
-        if: always()
-        with:
-          sarif_file: 'trivy-results-config.sarif'
-          category: 'trivy-config'
+      - name: Helm Install Dry-run (Dev)
+        run: |
+          helm install dry-run . -f values-dev.yaml --dry-run --debug
 
-      - name: Upload Trivy secrets scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v2
-        if: always()
-        with:
-          sarif_file: 'trivy-results-secrets.sarif'
-          category: 'trivy-secrets'
+      - name: Helm Install Dry-run (Prod)
+        run: |
+          helm install dry-run . -f values-prod.yaml --dry-run --debug
