@@ -96,3 +96,35 @@ preInstallHooks:
 jaeger:
   enabled: false
   # jaeger specific config goes here
+
+# ArgoCD hook configuration
+hooks:
+  presync:
+    enabled: true
+    image:
+      repository: alpine
+      tag: "3.18"
+      pullPolicy: IfNotPresent
+      pullSecrets: []
+    command:
+      - "/bin/sh"
+      - "-c"
+      - "echo PreSync hook running; exit 0"
+    backoffLimit: 0
+    activeDeadlineSeconds: 300
+    annotations: {}
+  postsync:
+    enabled: true
+    baseEndpoint: "localhost:8080/api/"
+    image:
+      repository: curlimages/curl
+      tag: "8.4.0"
+      pullPolicy: IfNotPresent
+      pullSecrets: []
+    command:
+      - "/bin/sh"
+      - "-c"
+      - "curl -fsSL \"$BASE_ENDPOINT\""
+    backoffLimit: 0
+    activeDeadlineSeconds: 300
+    annotations: {}
