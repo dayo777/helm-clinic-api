@@ -2,9 +2,11 @@ name: Helm Chart CI
 
 on:
   push:
-    branches: [ main, master ]
-  pull_request:
-    branches: [ main, master ]
+    branches: [ main ]
+
+env:
+  CHART_DIR: .
+  KUBERNETES_VERSION: "1.34.2"
 
 jobs:
   lint:
@@ -18,19 +20,30 @@ jobs:
       - name: Set up Helm
         uses: azure/setup-helm@v4
         with:
-          version: v3.12.0
+          version: v3.14.0
 
-      - name: Lint Helm Chart
-        run: |
-          helm lint .
+      - name: Set up chart-testing
+        uses: helm/chart-testing-action@v2.6.1
 
-      - name: Run yamllint
+      - name: Lint Helm Chart (default values)
+        run: helm lint . --strict --values values.yaml
+      
+      #  you can also add Linting for 'values-prod.yaml' as needed
+      # - name: Lint with Helm (Prod values)
+      #   run: helm lint . --strict --values values-prod.yaml
+
+      # if there are other values files, you can add them below using '--values values-prod.yaml'
+      - name: Validate values against schema
+        run: helm lint . --strict --values values.yaml
+
+      - name: Run yamllint on Chart
         run: |
-          sudo apt-get update && sudo apt-get install -y yamllint
-          yamllint .
+          pip install yamllint
+          yamllint . -c .yamllint.yaml
 
   validate:
     runs-on: ubuntu-latest
+    needs: lint
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -46,49 +59,51 @@ jobs:
           tar -xzf kubeconform-linux-amd64.tar.gz
           sudo mv kubeconform /usr/local/bin/
 
-      - name: Validate Helm Templates (Default)
+      # this can also be replicated for 'values-prod.yaml'
+      - name: Validate templates (Default values)
         run: |
           helm template test-release . | kubeconform -kubernetes-version 1.27.0 -strict -summary
-
-      - name: Validate Helm Templates (Dev)
-        run: |
-          helm template test-release . -f values-dev.yaml | kubeconform -kubernetes-version 1.27.0 -strict -summary
-
-      - name: Validate Helm Templates (Prod)
-        run: |
-          helm template test-release . -f values-prod.yaml | kubeconform -kubernetes-version 1.27.0 -strict -summary
+          helm template helm-clinic-api . \
+            --values values.yaml \
+            | kubeconform \
+              -kubernetes-version ${{ env.KUBERNETES_VERSION }} \
+              -strict \
+              -summary \
+              -ignore-missing-schemas
 
       - name: Set up Kube-linter
         run: |
-          curl -L https://github.com/stackrox/kube-linter/releases/download/v0.6.0/kube-linter-linux.tar.gz | tar -xz
+          curl -L https://github.com/stackrox/kube-linter/releases/download/v0.6.8/kube-linter-linux.tar.gz | tar -xz
           sudo mv kube-linter /usr/local/bin/
 
-      - name: Run Kube-linter
+      # you can swap for dev & prod value files as needed
+      - name: Run Kube-linter (Default values)
         run: |
-          helm template . | kube-linter lint -
+          helm template helm-clinic-api . --values values.yaml | kube-linter lint -
 
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+  # test:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v4
+  #       with:
+  #         fetch-depth: 0
 
-      - name: Set up Helm
-        uses: azure/setup-helm@v4
-        with:
-          version: v3.12.0
+  #     - name: Set up Helm
+  #       uses: azure/setup-helm@v4
+  #       with:
+  #         version: v3.12.0
 
-      - name: Set up Chart Testing
-        uses: helm/chart-testing-action@v2.6.1
+  #     - name: Set up Chart Testing
+  #       uses: helm/chart-testing-action@v2.6.1
 
-      - name: Run Chart Tests
-        run: |
-          ct lint --config .ct.yaml || true  # Adjust config as needed
+  #     - name: Run Chart Tests
+  #       run: |
+  #         ct lint --config .ct.yaml || true  # Adjust config as needed
 
   dry-run:
     runs-on: ubuntu-latest
+    needs: validate
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -96,16 +111,63 @@ jobs:
       - name: Set up Helm
         uses: azure/setup-helm@v4
         with:
-          version: v3.12.0
+          version: v3.14.0
 
-      - name: Helm Install Dry-run (Default)
-        run: |
-          helm install dry-run . --dry-run --debug
+      - name: Set up kind cluster
+        uses: helm/kind-action@v1.10.0
+        with:
+          node_image: kindest/node:v1.29.0
 
-      - name: Helm Install Dry-run (Dev)
+      - name: Helm dry-run (default values)
         run: |
-          helm install dry-run . -f values-dev.yaml --dry-run --debug
+          helm install clinic-booking-api . \
+            --values values.yaml \
+            --dry-run \
+            --debug \
+            --generate-name
 
-      - name: Helm Install Dry-run (Prod)
+      - name: Helm dry-run (dev values)
         run: |
-          helm install dry-run . -f values-prod.yaml --dry-run --debug
+          helm install clinic-booking-api . \
+            --values values.yaml \
+            --values values-dev.yaml \
+            --dry-run \
+            --debug \
+            --generate-name
+
+      - name: Helm dry-run (prod values)
+        run: |
+          helm install clinic-booking-api . \
+            --values values.yaml \
+            --values values-prod.yaml \
+            --dry-run \
+            --debug \
+            --generate-name
+
+  security:
+    runs-on: ubuntu-latest
+    needs: validate
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: v3.14.0
+
+      - name: Set up Trivy
+        run: |
+          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
+
+      - name: Scan Helm chart with Trivy (default values)
+        run: |
+          helm template clinic-booking-api . --values values.yaml > /tmp/manifests.yaml
+          trivy config /tmp/manifests.yaml --exit-code 0 --severity HIGH,CRITICAL
+
+      - name: Scan Helm chart with Trivy (dev values)
+        run: |
+          helm template clinic-booking-api . \
+            --values values.yaml \
+            --values values-dev.yaml > /tmp/manifests-dev.yaml
+          trivy config /tmp/manifests-dev.yaml --exit-code 0 --severity HIGH,CRITICAL

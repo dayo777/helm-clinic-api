@@ -1,0 +1,17 @@
+extends: default
+rules:
+  line-length:
+    max: 150
+  braces:
+    min-spaces-inside: 0
+    max-spaces-inside: 1
+  indentation:
+    spaces: 2
+    indent-sequences: true
+  truthy:
+    allowed-values: ['true', 'false']
+ignore: |
+  .git/
+  charts/
+  *.md
+  *.png
