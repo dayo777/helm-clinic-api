@@ -2,7 +2,7 @@ name: Helm Chart CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [ master ]
 
 env:
   CHART_DIR: .
