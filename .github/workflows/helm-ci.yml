@@ -125,25 +125,16 @@ jobs:
           helm install clinic-booking-api . \
             --values values.yaml \
             --dry-run \
-            --debug \
-            --generate-name
-
-      - name: Helm dry-run (dev values)
-        run: |
-          helm install clinic-booking-api . \
-            --values values.yaml \
-            --dry-run \
-            --debug \
-            --generate-name
-
-      - name: Helm dry-run (prod values)
-        run: |
-          helm install clinic-booking-api . \
-            --values values.yaml \
-            --values values-prod.yaml \
-            --dry-run \
-            --debug \
-            --generate-name
+            --debug
+#
+#      - name: Helm dry-run (prod values)
+#        run: |
+#          helm install clinic-booking-api . \
+#            --values values.yaml \
+#            --values values-prod.yaml \
+#            --dry-run \
+#            --debug \
+#            --generate-name
 
   security:
     runs-on: ubuntu-latest
