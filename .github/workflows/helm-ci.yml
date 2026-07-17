@@ -34,7 +34,7 @@ jobs:
 
       - name: Install yamllint
         run: |
-          python -m pip install --user yamllint
+          python -m pip install yamllint
 
       - name: Render and lint templates
         run: |
