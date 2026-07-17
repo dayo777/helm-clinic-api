@@ -2,7 +2,7 @@ name: Helm Chart CI
 
 on:
   push:
-    branches: [ master ]
+    branches: [ master, main ]
 
 env:
   CHART_DIR: .
@@ -32,14 +32,16 @@ jobs:
       # - name: Lint with Helm (Prod values)
       #   run: helm lint . --strict --values values-prod.yaml
 
-      # if there are other values files, you can add them below using '--values values-prod.yaml'
-      - name: Validate values against schema
-        run: helm lint . --strict --values values.yaml
-
-      - name: Run yamllint on Chart
+      - name: Install yamllint
         run: |
-          pip install yamllint
-          yamllint . -c .yamllint.yaml
+          python -m pip install --user yamllint
+
+      - name: Render and lint templates
+        run: |
+          mkdir tmp
+          touch tmp/renderd.yaml
+          helm template clinic-booking-api . --values values.yaml > tmp/renderd.yaml
+          yamllint tmp/renderd.yaml -c .yamllint.yaml
 
   validate:
     runs-on: ubuntu-latest

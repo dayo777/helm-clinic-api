@@ -34,11 +34,11 @@ spec:
                 exit 1
               fi
               echo "Checking connectivity to MongoDB endpoint..."
-              
+
               # Basic extraction of host and port from URI
               # Handles mongodb://[user:pass@]host1[:port1][,...hostN[:portN]][/[database][?options]]
               # and mongodb+srv://[user:pass@]host[/[database][?options]]
-              
+
               CLEAN_URI=$(echo $URI | sed -e 's|^[^/]*//||')
               # Remove credentials if present
               if echo "$CLEAN_URI" | grep -q "@"; then
@@ -48,10 +48,10 @@ spec:
               HOST_PORT_PART=$(echo "$CLEAN_URI" | cut -d/ -f1 | cut -d? -f1)
               # Handle multiple hosts (take the first one)
               FIRST_HOST=$(echo "$HOST_PORT_PART" | cut -d, -f1)
-              
+
               host=$(echo "$FIRST_HOST" | cut -d: -f1)
               port=$(echo "$FIRST_HOST" | cut -d: -f2)
-              
+
               if echo "$URI" | grep -q "^mongodb+srv://"; then
                 echo "Detected MongoDB+SRV URI. Checking DNS for $host..."
                 nslookup "$host" || exit 1

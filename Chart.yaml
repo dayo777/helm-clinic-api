@@ -21,8 +21,8 @@ maintainers:
   - name: Dru
     email: oruns@outlook.com
 
-# # added this in-case Jaeger needs to be added as a dependency.
-# # you can configure dependecy values through the Alias under `jaeger`
+# Added this in case Jaeger needs to be added as a dependency.
+# You can configure dependency values through the alias under `jaeger`.
 # dependencies:
 #   - name: jaeger
 #     version: ""

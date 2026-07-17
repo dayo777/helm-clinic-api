@@ -7,13 +7,13 @@ component: server
 partOf: clinic-backend
 
 replicaCount: 1
-#namespace: default
+# namespace: default
 
 image:
   repo: dayo777
   name: clinic-booking-api
   tag: main
-  imagePullPolicy: Always # since the latest container is always tagged `main`
+  imagePullPolicy: Always  # since the latest container is always tagged `main`
   ports:
     name: clinic-ports
 

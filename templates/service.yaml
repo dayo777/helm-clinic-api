@@ -13,4 +13,4 @@ spec:
       protocol: TCP
       name: {{ .Values.image.ports.name }}
   selector:
-    {{- include "clinic-booking-api.selectorLabels" . | nindent 4}}
+    {{- include "clinic-booking-api.selectorLabels" . | nindent 4 }}

@@ -22,10 +22,10 @@ metadata:
 spec:
   gatewayClassName: nginx-gateway-class
   listeners:
-  - name: http
-    protocol: HTTP
-    port: {{ $svcPort }}
-    hostname: {{ .Values.gateway.hostname | quote }}
-    allowedRoutes:
-      namespaces:
-        from: Same
+    - name: http
+      protocol: HTTP
+      port: {{ $svcPort }}
+      hostname: {{ .Values.gateway.hostname | quote }}
+      allowedRoutes:
+        namespaces:
+          from: Same

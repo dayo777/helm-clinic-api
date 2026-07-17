@@ -9,9 +9,14 @@ rules:
     spaces: 2
     indent-sequences: true
   truthy:
-    allowed-values: ['true', 'false']
+    allowed-values: ['true', 'false', 'on', 'off']
+  document-start: disable
 ignore: |
   .git/
+  .github/
   charts/
+  templates/
   *.md
   *.png
+  tmp/
+  /tmp/

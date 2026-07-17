@@ -4,7 +4,7 @@ kind: Job
 metadata:
   name: {{ include "clinic-booking-api.fullname" . }}-presync
   labels:
-{{ include "clinic-booking-api.labels" . | indent 4 }}
+{{- include "clinic-booking-api.labels" . | trim | nindent 4 }}
   annotations:
     "argocd.argoproj.io/hook": PreSync
     "argocd.argoproj.io/hook-delete-policy": HookSucceeded
@@ -13,7 +13,7 @@ spec:
   template:
     metadata:
       labels:
-{{ include "clinic-booking-api.selectorLabels" . | indent 8 }}
+{{- include "clinic-booking-api.selectorLabels" . | trim | nindent 8 }}
     spec:
       serviceAccountName: {{ include "clinic-booking-api.serviceAccountName" . }}
       restartPolicy: Never
@@ -22,12 +22,13 @@ spec:
         - name: presync
           image: "{{ .Values.hooks.presync.image.repository }}:{{ .Values.hooks.presync.image.tag }}"
           imagePullPolicy: {{ .Values.hooks.presync.image.pullPolicy }}
-          command: {{ toJson .Values.hooks.presync.command }}
+          command:
+{{ toYaml .Values.hooks.presync.command | indent 12 }}
           env:
             - name: RELEASE_NAME
               value: "{{ .Release.Name }}"
       {{- if .Values.hooks.presync.image.pullSecrets }}
       imagePullSecrets:
-{{- toYaml .Values.hooks.presync.image.pullSecrets | indent 8 }}
+        {{- toYaml .Values.hooks.presync.image.pullSecrets | nindent 8 }}
       {{- end }}
 {{- end }}

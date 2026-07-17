@@ -21,6 +21,9 @@
 .idea/
 *.tmproj
 .vscode/
+# Python virtual environments
+.venv/
+venv/
 # values files
 values-dev.yaml
 values-prod.yaml
